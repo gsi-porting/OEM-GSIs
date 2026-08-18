@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OEM GSI Collection</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Material You Theme Variables (Default: Blue) */
+            --primary: #0062a2;
+            --on-primary: #ffffff;
+            --primary-container: #d0e4ff;
+            --on-primary-container: #001d36;
+            --secondary-container: #d6e3ff;
+            --on-secondary-container: #001b3f;
+            --background: #fdfcff;
+            --on-background: #1a1c1e;
+            --surface: #fdfcff;
+            --surface-variant: #dfe2eb;
+            --on-surface-variant: #43474e;
+            --outline: #73777f;
+            --error: #ba1a1a;
+            --error-container: #ffdad6;
+            --on-error-container: #410002;
+            
+            /* Radius */
+            --radius-sm: 12px;
+            --radius-md: 16px;
+            --radius-lg: 24px;
+            --radius-full: 9999px;
+        }
+
+        /* Dark Mode Adjustments */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --primary: #9cbaff; /* Will be overridden by JS but acts as fallback */
+                --on-primary: #00325a;
+                --primary-container: #00497d;
+                --on-primary-container: #d0e4ff;
+                --background: #1a1c1e;
+                --on-background: #e2e2e5;
+                --surface: #1a1c1e;
+                --surface-variant: #43474e;
+                --on-surface-variant: #c3c6cf;
+                --outline: #8d9199;
+                --error: #ffb4ab;
+                --error-container: #93000a;
+                --on-error-container: #ffdad6;
+            }
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Roboto', sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        body {
+            background-color: var(--background);
+            color: var(--on-background);
+            line-height: 1.5;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Header & Color Picker */
+        header {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .color-picker {
+            display: flex;
+            gap: 12px;
+            background: var(--surface-variant);
+            padding: 8px 16px;
+            border-radius: var(--radius-full);
+            align-items: center;
+        }
+
+        .color-picker span {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--on-surface-variant);
+        }
+
+        .color-btn {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: transform 0.2s ease, border-color 0.2s ease;
+        }
+
+        .color-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .color-btn.active {
+            border-color: var(--on-background);
+        }
+
+        /* Changelog */
+        .changelog {
+            background-color: var(--secondary-container);
+            color: var(--on-secondary-container);
+            padding: 16px 24px;
+            border-radius: var(--radius-md);
+            margin-bottom: 32px;
+        }
+
+        .changelog h3 {
+            margin-bottom: 8px;
+            font-size: 1.1rem;
+        }
+
+        .changelog ul {
+            list-style-type: disc;
+            padding-left: 24px;
+        }
+
+        /* Navigation Tabs */
+        nav {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            padding-bottom: 12px;
+            margin-bottom: 24px;
+            scrollbar-width: none;
+        }
+        nav::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            background-color: var(--surface-variant);
+            color: var(--on-surface-variant);
+            border: none;
+            padding: 12px 24px;
+            border-radius: var(--radius-full);
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .tab-btn:hover {
+            background-color: rgba(var(--on-surface-variant), 0.1);
+        }
+
+        .tab-btn.active {
+            background-color: var(--primary);
+            color: var(--on-primary);
+        }
+
+        /* Content Sections */
+        .oem-section {
+            display: none;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .oem-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Cards Grid */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background-color: var(--primary-container);
+            color: var(--on-primary-container);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .card-header h2 {
+            font-size: 1.25rem;
+            margin-bottom: 4px;
+        }
+
+        .card-header p {
+            font-size: 0.875rem;
+            opacity: 0.8;
+        }
+
+        .link-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: auto;
+        }
+
+        /* Download Links / Buttons */
+        .download-btn {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: var(--surface);
+            color: var(--primary);
+            text-decoration: none;
+            padding: 12px 16px;
+            border-radius: var(--radius-md);
+            font-weight: 500;
+            font-size: 0.9rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .download-btn:hover {
+            background-color: var(--surface-variant);
+        }
+
+        .download-btn.dead {
+            background-color: var(--surface-variant);
+            color: var(--outline);
+            cursor: not-allowed;
+            text-decoration: line-through;
+            pointer-events: none;
+            box-shadow: none;
+        }
+
+        .chip {
+            background-color: var(--primary);
+            color: var(--on-primary);
+            font-size: 0.75rem;
+            padding: 2px 8px;
+            border-radius: var(--radius-full);
+            margin-left: 8px;
+        }
+
+        .chip.armv9 {
+            background-color: #6750a4; /* Fixed distinct color for armv9 */
+            color: white;
+        }
+
+        .chip.armv7 {
+            background-color: #79747e;
+            color: white;
+        }
+
+        /* Warning Banner */
+        .warning-banner {
+            background-color: var(--error-container);
+            color: var(--on-error-container);
+            padding: 16px;
+            border-radius: var(--radius-md);
+            margin-bottom: 24px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .warning-banner::before {
+            content: "⚠️";
+            font-size: 1.2rem;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-top">
+            <h1>OEM GSI Collection</h1>
+            <div class="color-picker">
+                <span>Theme</span>
+                <!-- Color palette buttons -->
+                <div class="color-btn active" style="background: #0062a2;" onclick="setTheme('blue', this)"></div>
+                <div class="color-btn" style="background: #196c31;" onclick="setTheme('green', this)"></div>
+                <div class="color-btn" style="background: #6750a4;" onclick="setTheme('purple', this)"></div>
+                <div class="color-btn" style="background: #a4303f;" onclick="setTheme('red', this)"></div>
+                <div class="color-btn" style="background: #984816;" onclick="setTheme('orange', this)"></div>
+            </div>
+        </div>
+    </header>
+
+    
+    </div>
+
+    <nav>
+        <button class="tab-btn active" onclick="switchTab('oneui')">OneUI</button>
+        <button class="tab-btn" onclick="switchTab('miui')">MIUI / HyperOS</button>
+        <button class="tab-btn" onclick="switchTab('pixel')">Pixel</button>
+        <button class="tab-btn" onclick="switchTab('oxygen')">OxygenOS</button>
+        <button class="tab-btn" onclick="switchTab('rising')">RisingOS</button>
+        <button class="tab-btn" onclick="switchTab('color')">ColorOS</button>
+        <button class="tab-btn" onclick="switchTab('realme')">RealmeUI</button>
+    </nav>
+
+    <main>
+        <!-- OneUI Section -->
+        <section id="oneui" class="oem-section active">
+            <div class="grid">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>OneUI 1.0</h2>
+                        <p>Android 9</p>
+                    </div>
+                    <div class="link-list">
+                        <a href="https://drive.google.com/file/d/1Xcmz7WprZk4i9JcY9ycOFkQQg4iET1-u/view?usp=drivesdk" class="download-btn">Ported from S9 <span class="chip">A-Only</span></a>
+                        <a href="https://mirrors.lolinet.com/firmware/gsi/OneUI/OneUI-Aonly-9-20190602-ErfanGSI.img.7z" class="download-btn">Ported from S10 Plus <span class="chip">A-Only</span></a>
+                        <a href="https://mirrors.lolinet.com/firmware/gsi/OneUI/OneUI-AB-9-20190602-ErfanGSI.img.7z" class="download-btn">Ported from S10 Plus <span class="chip">A/B</span></a>
+                        <a href="https://sourceforge.net/projects/origin-oem-ports/files/gsi/a9/OneUI-SGSI-9.0.tar.xz/download" class="download-btn">Ported from A60 <span class="chip">A/B</span></a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2>OneUI 2.x & 3.1</h2>
+                        <p>Android 10 / Android 11</p>
+                    </div>
+                    <div class="link-list">
+                        <a href="#" class="download-btn dead">OneUI 2.x Ported from A60 AB (Dead Link)</a>
+                        <a href="#" class="download-btn dead">OneUI 3.1 Ported from A60 AB (Dead Link)</a>
+                        <a href="https://sourceforge.net/projects/mystic-gsi-updates/files/Generic/Oneui-a70q-11-A705FXXU5DXD2-AB-20250209-MysticGSI.zip" class="download-btn">OneUI 3.1 A70 AB</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2>OneUI 4.0 & 4.1</h2>
+                        <p>Android 12</p>
+                    </div>
+                    <div class="link-list">
+                        <a href="https://sourceforge.net/projects/nippongsi/files/Generic%20-%20OneUI-4.0%20-%20RI6YFVQB4O/OneUI-4.0-AB-12-20220729-NipponGSI.img.gz" class="download-btn">4.0 S21 FE AB</a>
+                        <a href="https://sourceforge.net/projects/nippongsi/files/Generic%20-%20OneUI-4.1%20-%201TUVEUSF0G/OneUI-4.1-AB-12-20221211-NipponGSI.img.gz" class="download-btn">4.1 S10 5G AB</a>
+                        <a href="https://sourceforge.net/projects/nippongsi/files/Generic%20-%20OneUI-4.1%20-%20OQEWN9MEPI/OneUI-4.1-AB-12-20220807-NipponGSI.img.gz" class="download-btn">4.1 A90 5G AB</a>
+                        <a href="https://sourceforge.net/projects/mystic-gsi-updates/files/OneUI/Oneui-beyond0-12-G970FXXSGHWA3-AB-20231104-MysticGSI.zip" class="download-btn">4.1 S10e 4G AB</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2>OneUI 5.0 & 5.1</h2>
+                        <p>Android 13</p>
+                    </div>
+                    <div class="link-list">
+                        <a href="https://sourceforge.net/projects/mystic-gsi-updates/files/OneUI/Oneui-wise6bl-13-R960XXU1AWK4-AB-20250114-MysticGSI.zip" class="download-btn">5.0 MysticGSI <span class="chip armv7">arm-v7a</span></a>
+                        <a href="https://sourceforge.net/projects/nippongsi/files/Generic%20-%20OneUI-5.0%20-%20OKSTQ85U7A/OneUI-5.0-AB-13-20230202-NipponGSI.img.gz" class="download-btn">5.0 S10 Lite AB</a>
+                        <a href="https://sourceforge.net/projects/nippongsi/files/Generic%20-%20OneUI-5.0%20-%20FWTOAEIIS2/OneUI-5.0-AB-13-20230301-NipponGSI.img.gz" class="download-btn">5.0 A72 4G AB</a>
+                        <a href="https://sourceforge.net/projects/nippongsi/files/Generic%20-%20OneUI-5.1%20-%20USTJGCPTYG/OneUI-5.1-AB-13-20230207-NipponGSI.img.gz" class="download-btn">5.1 S23 Ultra AB</a>
+                        <a href="https://sourceforge.net/projects/mystic-gsi-updates/files/OneUI/Oneui-a34x-13-A346EXXU4AWG8-AB-20241017-MysticGSI.zip" class="download-btn">5.1 A34 5G AB</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2>OneUI 6.0 & 6.1</h2>
+                        <p>Android 14</p>
+                    </div>
+                    <div class="link-list">
+                        <a href="https://sourceforge.net/projects/mystic-gsi-updates/files/OneUI/Oneui-r0s-14-S901BXXS7DWL1-AB-20231218-MysticGSI.zip" class="download-btn">6.0 S22 5G AB</a>
+                        <a href="https://sourceforge.net/projects/mystic-gsi-updates/files/OneUI/Oneui-r11s-14-S711BXXS2BWL4-AB-20240102-MysticGSI.zip" class="download-btn">6.0 S23 FE 5G AB</a>
+                        <a href="https://sourceforge.net/projects/mystic-gsi-updates/files/OneUI/Oneui-e1q-14-S9210ZCU1AWM9-AB-20240222-MysticGSI.zip" class="download-btn">6.1 MysticGSI <span class="chip armv9">arm-v9</span></a>
+                        <a href="https://sourceforge.net/projects/mystic-gsi-updates/files/OneUI/Oneui-a34x-14-A346EXXU8CXG8-AB-20241018-MysticGSI.zip" class="download-btn">6.1 A34 5G AB</a>
+                        <a href="https://mysticcloud.hpdevfox.ru/2988e3101aee6f693697f793b96c671fd87de25b558b64ad/Oneui-a16x-14-A166BXXS2AXI7-AB-20241123-MysticGSI.zip" class="download-btn">6.1 A16 5G AB</a>
+                        <a href="https://mysticcloud.hpdevfox.ru/cbb9630cb94232aaee94440eb5dc9239f47ac3126dd188c5/Oneui-a05s-14-A057FXXU8CYC6-AB-20250330-MysticGSI.zip" class="download-btn">6.1 A05s AB</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2>OneUI 6.1.1, 7.0, 8.0</h2>
+                        <p>Android 14, 15, 16</p>
+                    </div>
+                    <div class="link-list">
+                        <a href="https://mysticcloud.hpdevfox.ru/46219705de2f3b4412f5fcc4c50ed2849bf26f99c7f87260/Oneui-e1s-14-S921BXXS5AXJ8-AB-20241203-MysticGSI.zip" class="download-btn">6.1.1 (A14) <span class="chip armv9">arm-v9</span></a>
+                        <a href="https://mysticcloud.hpdevfox.ru/c0d32a56e32ef18e99c9609c770af2e9de3872ab9f5cb997/Oneui-gts9-14-X716BXXU5BXKD-AB-20250104-MysticGSI.zip" class="download-btn">6.1.1 Tab S9 AB</a>
+                        <a href="https://mysticcloud.hpdevfox.ru/2a0c207badf8ca858fb44be204c77e317084039a5cdddb65/Oneui-a36xq-15-A366BXXU1AYB9-AB-20250330-MysticGSI.zip" class="download-btn">7.0 (A15) <span class="chip armv9">arm-v9</span></a>
+                        <a href="https://mysticcloud.hpdevfox.ru/b4595551d5dde448094ad7d8086697b78346396978aed781/Oneui-a26x-15-A266BXXU1AYB5-AB-20250330-MysticGSI.zip" class="download-btn">7.0 A26 5G AB</a>
+                        <a href="https://mysticcloud.hpdevfox.ru/6abba7df516a36a939a3e6a806c21d9d6888ae4047a92711/Oneui-pa3q-16-S938BXXU3BYE2-AB-20250505-MysticGSI.zip" class="download-btn">8.0 (A16) <span class="chip armv9">arm-v9</span></a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- MIUI / HyperOS Section -->
+        <section id="miui" class="oem-section">
+            <div class="grid">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>MIUI 10</h2>
+                        <p>Android 8.1 / 9.0 / 10</p>
+                    </div>
+                    <div class="link-list">
+                        <a href="https://drive.google.com/file/d/1Ycqd1NaSTmPwEjIFidfsSzkE_yp-EFez/view" class="download-btn">Redmi Note 4 (A8.1) <span class="chip">A-Only</span></a>
+                        <a href="https://mirrors.lolinet.com/firmware/gsi/MIUI/MIUI-Aonly-9-20190827-ErfanGSI.img.7z" class="download-btn">MIX 3 (A9.0) <span class="chip">A-Only</span></a>
+                        <a href="https://mirrors.lolinet.com/firmware/gsi/MIUI/MIUI-AB-9-20190827-ErfanGSI.img.7z" class="download-btn">MIX 3 (A9.0) <span class="chip">A/B</span></a>
+                        <a href="https://androidfilehost.com/?fid=1899786940962610824" class="download-btn">Redmi K20 Pro (A10) <span class="chip">A-Only</span></a>
+                        <a href="https://androidfilehost.com/?fid=1899786940962610823" class="download-btn">Redmi K20 Pro (A10) <span class="chip">A/B</span></a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2>MIUI 11 & 12</h2>
+                        <p>Android 9 / 10</p>
+                    </div>
+                    <div class="link-list">
+                        <a href="https://sourceforge.net/projects/nippongsi/files/MIUI/EU/9/MIUIeuolivelight-AB-9-20200506-ErfanGSI.7z/download" class="download-btn">MIUI 11 (A9) <span class="chip armv7">arm-v7 A/Only</span></a>
+                        <a href="https://sourceforge.net/projects/nippongsi/files/MIUI/EU/9/MIUIeuolivelight-Aonly-9-20200506-ErfanGSI.7z/download" class="download-btn">MIUI 11 (A9) <span class="chip armv7">arm-v7 A/B</span></a>
+                        <a href="https://sourceforge.net/projects/nippongsi/files/MIUI/GLOBAL/9/MiuiLavender-AB-9-20200518-ErfanGSI-nippongsi.7z/download" class="download-btn">MIUI 11 Redmi Note 7 <span class="chip">A/B</span></a>
+                        <a href="https://sourceforge.net/projects/nippongsi/files/MIUI/EU/10/Mi8SEEU-AB-10-20200814-nippongsi.7z/download" class="download-btn">MIUI 11 Mi 8 SE (A10) <span class="chip">A/B</span></a>
+                        <a href="https://androidfilehost.com/?fid=10763459528675564827" class="download-btn">MIUI 12 (A9) <span class="chip armv7">arm-v7 A-Only</span></a>
+                        <a href="https://sourceforge.net/projects/nippongsi/files/MIUI/EU/10/Mi9EU-AB-10-20200821-nippongsi.7z/download" class="download-btn">MIUI 12 Mi 9 Cepheus <span class="chip">A/B</span></a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2>MIUI 12.5 & 13</h2>
+                        <p>Android 10 / 11 / 12</p>
+                    </div>
+                    <div class="link-list">
+                        <a href="https://sourceforge.net/projects/nippongsi/files/MIUI%20-%20Global_Lavender_12.5.1%20-%2044B39B7M8O/Global_Lavender_12.5.1-AB-10-20210720-nippongsi.img.gz" class="download-btn">12.5 Note 7 (A10) <span class="chip">A/B</span></a>
+                        <a href="https://sourceforge.net/projects/nippongsi/files/MIUI%20-%20SweetGlobal_12.5.4%20-%20BW1NB9URZW/SweetGlobal_12.5.4-AB-11-20210820-nippongsi.img.gz" class="download-btn">12.5 Note 10 Pro (A11) <span class="chip">A/B</span></a>
+                        <a href="https://sourceforge.net/projects/nippongsi/files/MIUI%20-%20MIUI-Global-%5B13.0.15%5D-spes%20-%20ZDB1FORWMV/MIUI-Global-%5B13.0.15%5D-spes-AB-11-20220706-NipponGSI.img.gz" class="download-btn">13 Note 11 (A11) <span class="chip">A/B</span></a>
+                        <a href="https://sourceforge.net/projects/nippongsi/files/MIUI%20-%20MIUI-CN-%5B13.0.10%5D-psyche%20-%20EQ0FWUELZG/MIUI-CN-%5B13.0.10%5D-psyche-AB-12-20230207-NipponGSI.img.gz" class="download-btn">13 Xiaomi 12X (A12) <span class="chip">A/B</span></a>
+                        <a href="https://sourceforge.net/projects/mystic-gsi-updates/files/MIUI/Miui-moonstone-12-V13.0.2.0.SMPIDXM-AB-20240526-MysticGSI.zip" class="download-btn">13 POCO X5 5G (A12) <span class="chip">A/B</span></a>
+                        <a href="https://github.com/XorcistGSI/Builds" class="download-btn">13 Note 12 5G (Github) <span class="chip">A/B</span></a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2>MIUI 14</h2>
+                        <p>Android 12 / 13 / 14</p>
+                    </div>
+                    <div class="link-list">
+                        <a href="https://sourceforge.net/projects/nippongsi/files/MIUI%20-%20MIUI-Global-%5B14.0.1%5D-mojito%20-%20ENWPUCRNTL/MIUI-Global-%5B14.0.1%5D-mojito-AB-12-20230201-NipponGSI.img.gz" class="download-btn">Note 10 (A12) <span class="chip">A/B</span></a>
+                        <a href="https://sourceforge.net/projects/nippongsi/files/MIUI%20-%20MIUI-EU-%5B14.0.1%5D-vayu%20-%20GLRLO5VV0N/MIUI-EU-%5B14.0.1%5D-vayu-AB-13-20230202-NipponGSI.img.gz" class="download-btn">POCO X3 Pro (A13) <span class="chip">A/B</span></a>
+                        <a href="https://github.com/XorcistGSI/Builds" class="download-btn">Note 12 5G (A13) (Github) <span class="chip">A/B</span></a>
+                        <a href="https://sourceforge.net/projects/nippongsi/files/MIUI%20-%20MIUI-Global-%5B14.0.3%5D-earth%20-%20P0UR18XL7Y/MIUI-Global-%5B14.0.3%5D-earth-AB-13-20230703-NipponGSI.img.gz" class="download-btn">POCO C55 (A13) <span class="chip">A/B</span></a>
+                        <a href="https://sourceforge.net/projects/nippongsi/files/MIUI%20-%20MIUI-CN-%5B23.9.6%5D-nuwa%20-%20TIG5ZRNRCP/MIUI-CN-%5B23.9.6%5D-nuwa-AB-14-20230912-NipponGSI.img.gz" class="download-btn">Xiaomi 13 (A14) <span class="chip">A/B</span></a>
+                        <a href="https://sourceforge.net/projects/mystic-gsi-updates/files/MIUI/Miui-nuwa-14-V14.0.2.0.UMBCNXM-AB-20231010-MysticGSI.zip" class="download-btn">Xiaomi 13 Pro (A14) <span class="chip">A/B</span></a>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h2>HyperOS 1</h2>
+                        <p>Android 13 / 14 / 15</p>
+                    </div>
+                    <div class="link-list">
+                        <a href="https://sourceforge.net/projects/mystic-gsi-updates/files/HyperOS/Hyperos-aurora-14-V816.0.5.0.UNAMIXM-AB-20240519-MysticGSI.zip" class="download-btn">HyperOS 1 <span class="chip armv9">arm-v9a</span></a>
+                        <a href="https://sourceforge.net/projects/mystic-gsi-updates/files/HyperOS/Hyperos-mona-13-V816.0.2.0.TKVCNXM-AB-20240222-MysticGSI.zip" class="download-btn">Civi (A13) <span class="chip">A/B</span></a>
+                        <a href="https://sourceforge.net/projects/mystic-gsi-updates/files/HyperOS/Hyperos-redwood-14-V816.0.6.0.UMSCNXM-AB-20240525-MysticGSI.zip" class="download-btn">Note 12 Pro Speed (A14) <span class="chip">A/B</span></a>
+                        <a href="https://mysticcloud.hpdevfox.ru/0f38eb8ab2803b72fc6ea7d7b4833ea2575cc30c60b56e02/Hyperos-gale-14-V816.0.6.0.UGPEUXM-AB-20241123-MysticGSI.zip" class="download-btn">Redmi 13C (A14) <span class="chip">A/B</span></a>
+                        <a href="https://sourceforge.net/projects/mystic-gsi-updates/files/HyperOS/Hyperos-corot-VanillaIceCream-V816.0.240520.1.VMLCNXM.PRE-DPP-AB-20240524-MysticGSI.zip" class="download-btn">K60 Ultra (A15) <span class="chip">A/B</span></a>
+                        <a href="https://sourceforge.net/projects/mystic-gsi-updates/files/HyperOS/Hyperos-redwood-14-V816.0.7.0.UMSMIXM-AB-20241026-MysticGSI.zip" class="download-btn">POCO X5 Pro (A15) <span class="chip">A/B</span></a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2>HyperOS 2</h2>
+                        <p>Android 14 / 15 / 16</p>
+                    </div>
+                    <div class="link-list">
+                        <a href="https://sourceforge.net/projects/mystic-gsi-updates/files/HyperOS/Hyperos-dada-15-OS2.0.4.0.VOCCNDM-AB-20241029-MysticGSI.zip" class="download-btn">HyperOS 2 (A15) <span class="chip armv9">arm-v9a</span></a>
+                        <a href="https://mysticcloud.hpdevfox.ru/49473b4b4ce8baf6517728417dfee4536ea094c98e41fbcf/Hyperos-lisa-14-OS2.0.2.0.UKOCNXM-AB-20250413-MysticGSI.zip" class="download-btn">Mi 11 Lite LE (A14) <span class="chip">A/B</span></a>
+                        <a href="https://mysticcloud.hpdevfox.ru/43afd170f922c0723c0912607ac3b62139b3758ec9b896ef/Hyperos-duchamp-15-OS2.0.103.0.VNLEUXM-AB-20250414-MysticGSI.zip" class="download-btn">POCO X6 Pro 5G (A15) <span class="chip">A/B</span></a>
+                        <a href="https://sourceforge.net/projects/mystic-gsi-updates/files/HyperOS/Hyperos-nuwa-15-OS2.0.200.2.VMBEUXM-AB-20250506-MysticGSI.zip" class="download-btn">Xiaomi 13 Pro (A15) <span class="chip">A/B</span></a>
+                        <a href="https://mysticcloud.hpdevfox.ru/82a830d3a46586a8e6aec4eeb39b489e8e8dbd7715c8c3d1/Hyperos-rothko-Baklava-OS2.0.250327.1.WNNCNXM.PRE-DPP-AB-20250408-MysticGSI.zip" class="download-btn">Redmi K70 Ultra (A16) <span class="chip">A/B</span></a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Pixel Section -->
+        <section id="pixel" class="oem-section">
+            <div class="grid">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Pixel A9 & A10</h2>
+                        <p>Android 9.0 / 10.0</p>
+                    </div>
+                    <div class="link-list">
+                        <a href="https://sourceforge.net/projects/nippongsi/files/Pixel/Pixel3a-Aonly-9-20200603-ErfanGSI-nippongsi.7z/download" class="download-btn">Pixel 3a (A9) <span class="chip">A-Only</span></a>
+                        <a href="https://sourceforge.net/projects/nippongsi/files/Pixel/Pixel3a-AB-9-20200603-ErfanGSI-nippongsi.7z/download" class="download-btn">Pixel 3a (A9) <span class="chip">A/B</span></a>
+                        <a href="https://sourceforge.net/projects/nippongsi/files/Pixel/Pixel2XL-Aonly-10-20200827-nippongsi.7z/download" class="download-btn">Pixel 2 XL (A10) <span class="chip">A-Only</span></a>
+                        <a href="https://sourceforge.net/projects/nippongsi/files/Pixel/Pixel2XL-AB-10-20200827-nippongsi.7z/download" class="download-btn">Pixel 2 XL (A10) <span class="chip">A/B</span></a>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Pixel A11 - A13</h2>
+                        <p>Android 11 / 12 / 13</p>
+                    </div>
+                    <div class="link-list">
+                        <a href="https://sourceforge.net/projects/nippongsi/files/Pixel%20-%20Pixel-Pixel4-R%20-%20AOJUHALDCD/Pixel-Pixel4-R-AB-11-20211226-NipponGSI.img.gz" class="download-btn">Pixel 4 (A11) <span class="chip">A/B</span></a>
+                        <a href="https://sourceforge.net/projects/nippongsi/files/Pixel%20-%20Pixel-S-Pixel4XL%20-%20K1TFZTOJ4M/Pixel-S-Pixel4XL-AB-12-20220208-NipponGSI.img.gz" class="download-btn">Pixel 4 XL (A12) <span class="chip">A/B</span></a>
+                        <a href="https://sourceforge.net/projects/nippongsi/files/Pixel%20-%20Pixel-13.0-6a%20-%20LWKOAQN3VY/Pixel-13.0-6a-AB-13-20221205-NipponGSI.img.gz" class="download-btn">Pixel 6a (A13) <span class="chip">A/B</span></a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Pixel A14 - A16</h2>
+                        <p>Android 14 / 15 / 16</p>
+                    </div>
+                    <div class="link-list">
+                        <a href="https://sourceforge.net/projects/mystic-gsi-updates/files/Pixel/Pixel-husky-14-10808477-AB-20231005-MysticGSI.zip" class="download-btn">Pixel (A14) <span class="chip armv9">arm-v9a</span></a>
+                        <a href="https://sourceforge.net/projects/mystic-gsi-updates/files/Pixel/Pixel-cheetah-14-10754064-AB-20231004-MysticGSI.zip" class="download-btn">Pixel 7 Pro (A14) <span class="chip">A/B</span></a>
+                        <a href="https://mysticcloud.hpdevfox.ru/3f5d63ae120e7fb3e26362bbc28cdd1da0e44d758e1db016/Pixel-tegu-15-13238919-AB-20250410-MysticGSI.zip" class="download-btn">Pixel (A15) <span class="chip armv9">arm-v9a</span></a>
+                        <a href="https://mysticcloud.hpdevfox.ru/a794a817b0effea1b4a7cf0709ecbd5d556f7955163517a4/Pixel-cheetah-15-13240308-AB-20250407-MysticGSI.zip" class="download-btn">Pixel 7 Pro (A15) <span class="chip">A/B</span></a>
+                        <a href="https://sourceforge.net/projects/mystic-gsi-updates/files/Pixel/Pixel-caiman-VanillaIceCream-11747106-AB-20250503-MysticGSI.zip" class="download-btn">Pixel (A16) <span class="chip armv9">arm-v9a</span></a>
+                        <a href="https://mysticcloud.hpdevfox.ru/7b0970d73e5144e45e5867379dbd10c86efda52534066ed9/Pixel-tangorpro-Baklava-12787338-AB-20241219-MysticGSI.zip" class="download-btn">Pixel Tablet (A16) <span class="chip">A/B</span></a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- OxygenOS Section -->
+        <section id="oxygen" class="oem-section">
+            <div class="warning-banner">
+                Starting with OxygenOS 16.0 all builds are armv9. Do not try to flash them with armv8 or you may risk hardbrick.
+            </div>
+            <div class="grid">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>OxygenOS 9, 10, 11</h2>
+                        <p>Android 9 / 10 / 11</p>
+                    </div>
+                    <div class="link-list">
+                        <a href="https://sourceforge.net/projects/oemgsis/files/OxygenOS/OxygenOS-OP7P5G-Aonly-9-20191006-ErfanGSI.img.7z/download" class="download-btn">OOS 9 OP7 Pro 5G <span class="chip">A-Only</span></a>
+                        <a href="https://sourceforge.net/projects/oemgsis/files/OxygenOS/OxygenOS-OP7P5G-AB-9-20191006-ErfanGSI.img.7z/download" class="download-btn">OOS 9 OP7 Pro 5G <span class="chip">A/B</span></a>
+                        <a href="https://sourceforge.net/projects/nippongsi/files/oos/NordOxygen-Aonly-10-20201108-nippongsi.7z/download" class="download-btn">OOS 10 Nord <span class="chip">A-Only</span></a>
+                        <a href="https://sourceforge.net/projects/nippongsi/files/oos/NordOxygen-AB-10-20201108-nippongsi.7z/download" class="download-btn">OOS 10 Nord <span class="chip">A/B</span></a>
+                        <a href="https://sourceforge.net/projects/origin-oem-ports/files/gsi/a11/Oxygenos-sGSI-Android11-AB-20250526.tar.xz/download" class="download-btn">OOS 11 Nord <span class="chip">A/B</span></a>
+                        <a href="https://sourceforge.net/projects/nippongsi/files/OxygenOS%20-%20QHLHIYKYNU/OxygenOS-AB-11-20220706-NipponGSI.img.gz" class="download-btn">OOS 11 OP9R <span class="chip">A/B</span></a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2>OxygenOS 12 & 13</h2>
+                        <p>Android 12 / 13</p>
+                    </div>
+                    <div class="link-list">
+                        <a href="https://sourceforge.net/projects/nippongsi/files/Generic%20-%20OxygenOS-12.0%20-%20F327QLVZXA/OxygenOS-12.0-AB-12-20220928-NipponGSI.img.gz" class="download-btn">12.0 OP9R <span class="chip">A/B</span></a>
+                        <a href="https://sourceforge.net/projects/nippongsi/files/Generic%20-%20OxygenOS-12.1%20-%20CUPY6IQWCG/OxygenOS-12.1-AB-12-20220812-NipponGSI.img.gz" class="download-btn">12.1 Nord CE2 Lite <span class="chip">A/B</span></a>
+                        <a href="https://sourceforge.net/projects/nippongsi/files/Generic%20-%20OxygenOS-13.0%20-%20MSVHTRUOWQ/OxygenOS-13.0-AB-13-20230216-NipponGSI.img.gz" class="download-btn">13.0 OnePlus 11 <span class="chip">A/B</span></a>
+                        <a href="https://sourceforge.net/projects/nippongsi/files/Generic/OxygenOS-13.1-AB-13-20230613-NipponGSI.img.gz/download" class="download-btn">13.1 OnePlus 11 <span class="chip">A/B</span></a>
+                        <a href="https://sourceforge.net/projects/mystic-gsi-updates/files/Oxygen/Oxygenos-ossi-13-1697880147395-AB-20231110-MysticGSI.zip" class="download-btn">13.2 OnePlus Open <span class="chip">A/B</span></a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2>OxygenOS 14, 15, 16</h2>
+                        <p>Android 14 / 15 / 16</p>
+                    </div>
+                    <div class="link-list">
+                        <a href="https://sourceforge.net/projects/mystic-gsi-updates/files/Oxygen/Oxygenos-OP556FL1-14-1708433352053-AB-20250330-MysticGSI.zip" class="download-btn">14.0 Nord 3 <span class="chip">A/B</span></a>
+                        <a href="https://sourceforge.net/projects/mystic-gsi-updates/files/Oxygen/Oxygenos-OP5D3BL1-15-1735290652370-AB-20250113-MysticGSI.zip" class="download-btn">15.0 GSI <span class="chip armv9">arm-v9</span></a>
+                        <a href="https://sourceforge.net/projects/mystic-gsi-updates/files/Oxygen/Oxygenos-OP5D35L1-15-1729800593233-AB-20241030-MysticGSI.zip" class="download-btn">15.0 OnePlus 12R <span class="chip">A/B</span></a>
+                        <a href="https://mysticcloud.hpdevfox.ru/437fb78285453b78d71c0756b912ee3fe51e6d16de5aa1eb/Oxygenos-OP5D55L1-15-1737137746108-AB-20250130-MysticGSI.zip" class="download-btn">16.0 (A15) <span class="chip armv9">arm-v9</span></a>
+                        <a href="https://mysticcloud.hpdevfox.ru/c182856a195ed080ace996ef3ccb9d5b7122e0672b1a6a2e/Oxygenos-OP5D55L1-Baklava-1743434027509-AB-20250409-MysticGSI.zip" class="download-btn">16.0 (A16) <span class="chip armv9">arm-v9</span></a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- RisingOS Section -->
+        <section id="rising" class="oem-section">
+            <div class="grid">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>RisingOS 1, 2, 3</h2>
+                        <p>Android 13 / 14</p>
+                    </div>
+                    <div class="link-list">
+                        <a href="https://sourceforge.net/projects/nippongsi/files/Generic%20-%20risingOS-1.2%20-%20CIVK2GN5YL/risingOS-1.2-AB-13-20230723-nipponGSI.img.gz" class="download-btn">RisingOS 1 Note 5 (A13) <span class="chip">A/B</span></a>
+                        <a href="https://sourceforge.net/projects/mystic-gsi-updates/files/Generic/RisingOS-sweet-14-1700933646-AB-20231126-MysticGSI.zip" class="download-btn">RisingOS 2 Note 10 Pro (A14) <span class="chip">A/B</span></a>
+                        <a href="https://sourceforge.net/projects/mystic-gsi-updates/files/Generic/Risingos-munch-14-eng.nobody.20240517.115058-AB-20240518-MysticGSI.zip" class="download-btn">RisingOS 3 POCO F4 (A14) <span class="chip">A/B</span></a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2>RisingOS 6 & 7</h2>
+                        <p>Android 15</p>
+                    </div>
+                    <div class="link-list">
+                        <a href="https://mysticcloud.hpdevfox.ru/38db47dff3a987c2b4534eecabc751bfdab4e6c76f415952/Risingos-OnePlus8T-15-eng.nobody-AB-20241203-MysticGSI.zip" class="download-btn">RisingOS 6 OnePlus 8T <span class="chip">A/B</span></a>
+                        <a href="https://sourceforge.net/projects/origin-oem-ports/files/gsi/generic/Generic-15.0-husky-20250616-RisingOS7.1-OFFICIAL.7z/download" class="download-btn">RisingOS 7 Generic <span class="chip armv9">arm-v9</span></a>
+                        <a href="https://sourceforge.net/projects/risingos-revived/files/7.x/GAPPS/bluejay/RisingOS_Revived-7.0-250519-0237-GAPPS-OFFICIAL-bluejay.zip/download" class="download-btn">RisingOS 7 Pixel 6a <span class="chip">A/B</span></a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ColorOS Section -->
+        <section id="color" class="oem-section">
+            <div class="grid">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>ColorOS 9 - 11</h2>
+                        <p>Android 9 / 10 / 11</p>
+                    </div>
+                    <div class="link-list">
+                        <a href="https://sourceforge.net/projects/nippongsi/files/ColorOS/ColorOS-Aonly-9-20200520-ErfanGSI-nippongsi.7z/download" class="download-btn">9 OPPO F11 <span class="chip">A-Only</span></a>
+                        <a href="https://sourceforge.net/projects/nippongsi/files/ColorOS/ColorOS-AB-9-20200520-ErfanGSI-nippongsi.7z/download" class="download-btn">9 OPPO F11 <span class="chip">A/B</span></a>
+                        <a href="https://sourceforge.net/projects/nippongsi/files/ColorOS%20-%20WPMW3NU7F6/ColorOS-Aonly-10-20201229-ErfanGSI.img.gz" class="download-btn">10 OPPO F9 <span class="chip">A-Only</span></a>
+                        <a href="https://sourceforge.net/projects/nippongsi/files/ColorOS%20-%20WPMW3NU7F6/ColorOS-AB-10-20201229-ErfanGSI.img.gz" class="download-btn">10 OPPO F9 <span class="chip">A/B</span></a>
+                        <a href="https://sourceforge.net/projects/nippongsi/files/ColorOS/ColorOS-AB-11-20210117-nippongsi.img.gz/download" class="download-btn">11 OPPO Reno Ace <span class="chip">A/B</span></a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2>ColorOS 12 - 15</h2>
+                        <p>Android 12 / 13 / 14 / 15</p>
+                    </div>
+                    <div class="link-list">
+                        <a href="https://sourceforge.net/projects/nippongsi/files/Generic/ColorOS-AB-12-20220902-NipponGSI.img.7z/download" class="download-btn">12 OPPO Pad Air <span class="chip">A/B</span></a>
+                        <a href="https://sourceforge.net/projects/mystic-gsi-updates/files/ColorOS/Coloros-OP526D-13-1696318235411-AB-20231207-MysticGSI.zip" class="download-btn">13 OPPO A57 <span class="chip">A/B</span></a>
+                        <a href="https://sourceforge.net/projects/mystic-gsi-updates/files/ColorOS/Coloros-lahaina-14-1705485286742-AB-20240222-MysticGSI.zip" class="download-btn">14 OPPO Reno 10 Pro <span class="chip">A/B</span></a>
+                        <a href="https://sourceforge.net/projects/mystic-gsi-updates/files/ColorOS/Coloros-OP5E9EL1-15-1737474398795-AB-20250309-MysticGSI.zip" class="download-btn">15 GSI <span class="chip armv9">arm-v9</span></a>
+                        <a href="https://sourceforge.net/projects/mystic-gsi-updates/files/ColorOS/Coloros-OP5DF3-15-1734488607205-AB-20241229-MysticGSI.zip" class="download-btn">15 OPPO A5 Pro 5G <span class="chip">A/B</span></a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- RealmeUI Section -->
+        <section id="realme" class="oem-section">
+            <div class="grid">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>RealmeUI 1.0 - 3.0</h2>
+                        <p>Android 10 / 11 / 12</p>
+                    </div>
+                    <div class="link-list">
+                        <a href="https://sourceforge.net/projects/nippongsi/files/Generic/RealmeUI-Aonly-10-20210117-nippongsi.img.gz/download" class="download-btn">1.0 Realme 2 Pro (A10) <span class="chip">A-Only</span></a>
+                        <a href="https://sourceforge.net/projects/nippongsi/files/Generic/RealmeUI-AB-10-20210117-nippongsi.img.gz/download" class="download-btn">1.0 Realme 2 Pro (A10) <span class="chip">A/B</span></a>
+                        <a href="https://sourceforge.net/projects/nippongsi/files/RealmeUI/RealmeUI-AB-11-20210731-nippongsi.img.gz/download" class="download-btn">2.0 Realme 6 Pro (A11) <span class="chip">A/B</span></a>
+                        <a href="https://sourceforge.net/projects/nippongsi/files/Generic%20-%20RealmeUI-3.0%20-%20GUQCMCP2WK/RealmeUI-3.0-AB-12-20221028-NipponGSI.img.gz" class="download-btn">3.0 Realme 7 Pro (A12) <span class="chip">A/B</span></a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2>RealmeUI 4.0 - 6.0</h2>
+                        <p>Android 13 / 14 / 15</p>
+                    </div>
+                    <div class="link-list">
+                        <a href="https://sourceforge.net/projects/nippongsi/files/Generic%20-%20RealmeUI-4.0%20-%20YGG5I4I4HE/RealmeUI-4.0-AB-13-20230307-NipponGSI.img.gz" class="download-btn">4.0 GT Master Edition (A13) <span class="chip">A/B</span></a>
+                        <a href="https://mysticcloud.hpdevfox.ru/48898ac8c84753c2287c218bd2a456d0905f5741680ae157/Realmeui-RE5CA3L1-14-1729279765601-AB-20250108-MysticGSI.zip" class="download-btn">5.0 13 Pro+ 5G (A14) <span class="chip">A/B</span></a>
+                        <a href="https://mysticcloud.hpdevfox.ru/431f03bf7a726062f91aa088e676a583b4c3f67bd0933af4/Realmeui-RE606FL1-15-1729784712613-AB-20241125-MysticGSI.zip" class="download-btn">6.0 GSI (A15) <span class="chip armv9">arm-v9</span></a>
+                        <a href="https://mysticcloud.hpdevfox.ru/ac24ff2834744cb5ab60c1f8461b9cb203b271dc981b28c3/Realmeui-RE5C33-15-1732286398208-AB-20241204-MysticGSI.zip" class="download-btn">6.0 GT5 (A15) <span class="chip">A/B</span></a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // Tab Switching Logic
+        function switchTab(tabId) {
+            // Update Tab Buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // Update Sections
+            document.querySelectorAll('.oem-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.getElementById(tabId).classList.add('active');
+        }
+
+        // Material You Theme Logic
+        const themes = {
+            blue: {
+                primary: '#0062a2',
+                primaryContainer: '#d0e4ff',
+                onPrimaryContainer: '#001d36',
+                surfaceVariant: '#dfe2eb',
+                onSurfaceVariant: '#43474e'
+            },
+            green: {
+                primary: '#196c31',
+                primaryContainer: '#a3f6a8',
+                onPrimaryContainer: '#002107',
+                surfaceVariant: '#dee5d9',
+                onSurfaceVariant: '#424940'
+            },
+            purple: {
+                primary: '#6750a4',
+                primaryContainer: '#eaddff',
+                onPrimaryContainer: '#21005e',
+                surfaceVariant: '#e7e0ec',
+                onSurfaceVariant: '#49454f'
+            },
+            red: {
+                primary: '#a4303f',
+                primaryContainer: '#ffd9dc',
+                onPrimaryContainer: '#400010',
+                surfaceVariant: '#f4dddf',
+                onSurfaceVariant: '#524345'
+            },
+            orange: {
+                primary: '#984816',
+                primaryContainer: '#ffdcc5',
+                onPrimaryContainer: '#331200',
+                surfaceVariant: '#f4ded4',
+                onSurfaceVariant: '#52443d'
+            }
+        };
+
+        // Dark mode palettes adjust slightly for visibility
+        const darkThemes = {
+            blue: { primary: '#9cbaff', primaryContainer: '#00497d', onPrimaryContainer: '#d0e4ff', surfaceVariant: '#43474e', onSurfaceVariant: '#c3c6cf' },
+            green: { primary: '#88d98e', primaryContainer: '#005320', onPrimaryContainer: '#a3f6a8', surfaceVariant: '#424940', onSurfaceVariant: '#c2c9bd' },
+            purple: { primary: '#cfbcff', primaryContainer: '#4f378b', onPrimaryContainer: '#eaddff', surfaceVariant: '#49454f', onSurfaceVariant: '#cac4d0' },
+            red: { primary: '#ffb3ba', primaryContainer: '#83152a', onPrimaryContainer: '#ffd9dc', surfaceVariant: '#524345', onSurfaceVariant: '#d7c1c3' },
+            orange: { primary: '#ffb690', primaryContainer: '#773200', onPrimaryContainer: '#ffdcc5', surfaceVariant: '#52443d', onSurfaceVariant: '#d7c2b8' }
+        };
+
+        function setTheme(color, btnElement) {
+            // Update active state on color picker
+            document.querySelectorAll('.color-btn').forEach(btn => btn.classList.remove('active'));
+            if(btnElement) btnElement.classList.add('active');
+
+            const isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const themeConfig = isDark ? darkThemes[color] : themes[color];
+
+            const root = document.documentElement;
+            root.style.setProperty('--primary', themeConfig.primary);
+            root.style.setProperty('--primary-container', themeConfig.primaryContainer);
+            root.style.setProperty('--on-primary-container', themeConfig.onPrimaryContainer);
+            root.style.setProperty('--surface-variant', themeConfig.surfaceVariant);
+            root.style.setProperty('--on-surface-variant', themeConfig.onSurfaceVariant);
+        }
+
+        // Listen for OS dark mode changes to update the theme dynamically based on selected color
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+            const activeColorBtn = document.querySelector('.color-btn.active');
+            let colorString = 'blue';
+            if(activeColorBtn.style.background.includes('196c31')) colorString = 'green';
+            if(activeColorBtn.style.background.includes('6750a4')) colorString = 'purple';
+            if(activeColorBtn.style.background.includes('a4303f')) colorString = 'red';
+            if(activeColorBtn.style.background.includes('984816')) colorString = 'orange';
+            
+            setTheme(colorString, activeColorBtn);
+        });
+    </script>
+</body>
+</html>
