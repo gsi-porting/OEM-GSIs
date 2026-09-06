@@ -24,6 +24,7 @@ A modern, Material You-themed web index hosting a curated collection of Generic 
 
 1. **Unlock Bootloader:** Ensure your device's bootloader is unlocked.
 2. **Download & Extract:** Download the GSI archive for your desired OEM/version from the collection and extract it to get the `system.img` (or similar `.img` file).
+
    **Make Sure:** Your Kernel Is Permissive Or It can Cause Bootloop And to make it permissive Use permissier-v5.zip
 4. **Boot into Fastboot / Fastbootd:** Connect your phone to a PC and boot into fastboot mode.
 5. **Flash the GSI:**
